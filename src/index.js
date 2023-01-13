@@ -56,8 +56,8 @@ app.post("/messages", (req, res) => {
   const from = req.headers.user;
   const collection = db.collection("messages");
   const statusValidade = schemas.messages.validate(message);
-  //Já o from da mensagem, ou seja, o remetente, não será enviado 
-  //pelo body. Será enviado pelo front através de um header na 
+  //Já o from da mensagem, ou seja, o remetente, não será enviado
+  //pelo body. Será enviado pelo front através de um header na
   //requisição, chamado User
   //ToDo
 
@@ -68,10 +68,27 @@ app.post("/messages", (req, res) => {
   const insertPromise = collection.insertOne({
     ...message,
     from: from,
-    time: dayjs().format("HH:mm:ss")
-  })
+    time: dayjs().format("HH:mm:ss"),
+  });
   insertPromise.then(() => res.sendStatus(201));
   insertPromise.catch((err) => res.status(500).send(err));
+});
+
+app.get("/messages", async (req, res) => {
+  const user = req.headers.user;
+  const limit = Number(req.query.limit);
+  const collection = db.collection("messages");
+
+  try {
+    const messages = await collection
+      .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
+      .limit(limit)
+      .toArray();
+
+    res.status(201).send(messages);
+  } catch (error) {
+    res.status(500).send({ msg: "Algo deu errado internamente", error });
+  }
 });
 
 app.listen(5000, () => {
