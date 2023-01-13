@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import dayjs from "dayjs";
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 dotenv.config();
@@ -23,8 +24,6 @@ app.post("/participants", (req, res) => {
   const participant = req.body;
   const statusValidate = schemas.participants.validate(participant);
   const collection = db.collection("participants");
-
-  //console.log(collection);
 
   if (statusValidate.error) {
     res.status(422).send("name deve ser string não vazio");
@@ -50,6 +49,29 @@ app.get("/participants", async (_, res) => {
   const collection = db.collection("participants");
   const participants = await collection.find({}).toArray();
   res.status(200).send(participants);
+});
+
+app.post("/messages", (req, res) => {
+  const message = req.body;
+  const from = req.headers.user;
+  const collection = db.collection("messages");
+  const statusValidade = schemas.messages.validate(message);
+  //Já o from da mensagem, ou seja, o remetente, não será enviado 
+  //pelo body. Será enviado pelo front através de um header na 
+  //requisição, chamado User
+  //ToDo
+
+  if (statusValidade.error) {
+    return res.sendStatus(422);
+  }
+
+  const insertPromise = collection.insertOne({
+    ...message,
+    from: from,
+    time: dayjs().format("HH:mm:ss")
+  })
+  insertPromise.then(() => res.sendStatus(201));
+  insertPromise.catch((err) => res.status(500).send(err));
 });
 
 app.listen(5000, () => {
