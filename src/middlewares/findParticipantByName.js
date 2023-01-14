@@ -9,7 +9,7 @@ export default async function findParticipantByName(req, res, next) {
     db = mongoClient.db();
   });
 
-  const name = req.headers.user;
+  const name = req.headers.user || req.body.name;
   console.log(name);
   const collection = db.collection("participants");
 

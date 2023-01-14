@@ -21,7 +21,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post("/participants", (req, res) => {
+app.post("/participants", findParticipantByName, (req, res) => {
   const participant = req.body;
   const statusValidate = schemas.participants.validate(participant);
   const collection = db.collection("participants");
@@ -31,8 +31,7 @@ app.post("/participants", (req, res) => {
     return;
   }
 
-  //Impedir cadastro de um nome que já esteja sendo utilizado
-  //ToDo
+  if (req.findedUser) return res.status(409).send("Nome de usuário em uso");
 
   const insertPromise = collection.insertOne({
     ...participant,
