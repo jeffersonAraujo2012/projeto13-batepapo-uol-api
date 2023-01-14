@@ -123,7 +123,7 @@ app.get("/messages", async (req, res) => {
 
   try {
     const messages = await collection
-      .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
+      .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] }, {_id: 0})
       .limit(limit)
       .toArray();
 
