@@ -25,6 +25,7 @@ app.post("/participants", findParticipantByName, (req, res) => {
   const participant = req.body;
   const statusValidate = schemas.participants.validate(participant);
   const collection = db.collection("participants");
+  const messages = db.collection("messages");
 
   if (statusValidate.error) {
     res.status(422).send("name deve ser string não vazio");
@@ -40,9 +41,14 @@ app.post("/participants", findParticipantByName, (req, res) => {
 
   insertPromise.then(() => res.sendStatus(201));
   insertPromise.catch(() => res.sendStatus(500));
-  //Salvar com o MongoDB uma mensagem no formato:
-  //{from: 'xxx', to: 'Todos', text: 'entra na sala...', type: 'status', time: 'HH:MM:SS'}
-  //TODO
+
+  messages.insertOne({
+    from: participant.name,
+    to: "Todos",
+    text: "entra na sala...",
+    type: "status",
+    time: dayjs().format("HH:mm:ss"),
+  });
 });
 
 app.get("/participants", async (_, res) => {
