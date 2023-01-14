@@ -31,7 +31,17 @@ setInterval(async () => {
       try {
         const result = await db
           .collection("participants")
-          .deleteOne({_id: ObjectId(participant._id)});
+          .deleteOne({ _id: ObjectId(participant._id) });
+
+        if (result.deletedCount === 1) {
+          await db.collection("messages").insertOne({
+            from: participant.name,
+            to: "Todos",
+            text: "sai da sala...",
+            type: "status",
+            time: dayjs().format("HH:mm:ss"),
+          });
+        }
       } catch (err) {
         return console.log("Alguma coisa deu errada internamente: " + err);
       }
