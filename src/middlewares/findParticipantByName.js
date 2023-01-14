@@ -10,11 +10,9 @@ export default async function findParticipantByName(req, res, next) {
   });
 
   const name = req.headers.user || req.body.name;
-  console.log(name);
   const collection = db.collection("participants");
-
   const user = await collection.findOne({name: name});
+
   req.findedUser = user;
-  
   next();
 }

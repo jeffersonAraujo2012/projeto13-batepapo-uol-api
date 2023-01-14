@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dayjs from "dayjs";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -20,6 +20,24 @@ mongoClient.connect().then(() => {
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+//Remoção de usuários inativos
+setInterval(async () => {
+  const participants = await fetch("http://localhost:5000/participants").then(
+    (res) => res.json()
+  );
+  participants.forEach(async (participant) => {
+    if (Date.now() - participant.lastStatus > 10) {
+      try {
+        const result = await db
+          .collection("participants")
+          .deleteOne({_id: ObjectId(participant._id)});
+      } catch (err) {
+        return console.log("Alguma coisa deu errada internamente: " + err);
+      }
+    }
+  });
+}, 15000);
 
 app.post("/participants", findParticipantByName, (req, res) => {
   const participant = req.body;
