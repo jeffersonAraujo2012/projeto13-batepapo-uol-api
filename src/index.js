@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import * as schemas from "./schemas/index.js";
+import findParticipantByName from "./middlewares/findParticipantByName.js";
 
 //Database connection
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
@@ -88,6 +89,20 @@ app.get("/messages", async (req, res) => {
     res.status(201).send(messages);
   } catch (error) {
     res.status(500).send({ msg: "Algo deu errado internamente", error });
+  }
+});
+
+app.post("/status", findParticipantByName, async (req, res) => {
+  const collection = db.collection("participants");
+  const user = req.findedUser;
+
+  if (!user) return res.sendStatus(404);
+
+  try {
+    await collection.updateOne(user, { $set: { lastStatus: Date.now() } });
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.status(500).send("Erro interno! Cód: I-103");
   }
 });
 
