@@ -27,7 +27,8 @@ setInterval(async () => {
     (res) => res.json()
   );
   participants.forEach(async (participant) => {
-    if (Date.now() - participant.lastStatus > 10) {
+    if (Date.now() - participant.lastStatus > 10000) {
+      console.log(Date.now(), participant.lastStatus);
       try {
         const result = await db
           .collection("participants")
@@ -85,7 +86,7 @@ app.get("/participants", async (_, res) => {
   res.status(200).send(participants);
 });
 
-app.post("/messages", (req, res) => {
+app.post("/messages", async (req, res) => {
   const message = req.body;
   const from = req.headers.user;
   const collection = db.collection("messages");
@@ -99,13 +100,20 @@ app.post("/messages", (req, res) => {
     return res.sendStatus(422);
   }
 
-  const insertPromise = collection.insertOne({
-    ...message,
-    from: from,
-    time: dayjs().format("HH:mm:ss"),
-  });
-  insertPromise.then(() => res.sendStatus(201));
-  insertPromise.catch((err) => res.status(500).send(err));
+  try {
+    await collection.insertOne({
+      ...message,
+      from: from,
+      time: dayjs().format("HH:mm:ss"),
+    });
+    await db.collection("participants").updateOne(
+      { name: from },
+      { $set: { lastStatus: Date.now() } }
+    );
+    return res.sendStatus(201);
+  } catch (err) {
+    return res.status(500).send(err);
+  }
 });
 
 app.get("/messages", async (req, res) => {
