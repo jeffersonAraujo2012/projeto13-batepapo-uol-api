@@ -128,14 +128,10 @@ app.get("/messages", async (req, res) => {
     if (limit === Infinity) {
       messages = await collection
         .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
-        .project({ _id: 0 })
-        .sort({time: -1})
         .toArray();
     } else {
       messages = await collection
         .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
-        .project({ _id: 0 })
-        .sort({time: -1})
         .limit(limit)
         .toArray();
     }
