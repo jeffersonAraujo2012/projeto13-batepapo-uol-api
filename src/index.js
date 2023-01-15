@@ -137,7 +137,7 @@ app.get("/messages", async (req, res) => {
         .toArray();
     }
 
-    return res.status(201).send(messages);
+    return res.status(200).send(messages);
   } catch (error) {
     return res.status(500).send({ msg: "Algo deu errado internamente", error });
   }
