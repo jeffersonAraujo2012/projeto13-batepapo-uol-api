@@ -140,7 +140,7 @@ app.post("/status", findParticipantByName, async (req, res) => {
 
   try {
     await collection.updateOne(user, { $set: { lastStatus: Date.now() } });
-    return res.sendStatus(200);
+    return res.sendStatus(201);
   } catch (error) {
     return res.status(500).send("Erro interno! Cód: I-103");
   }
