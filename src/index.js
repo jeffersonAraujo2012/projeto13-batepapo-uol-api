@@ -23,12 +23,13 @@ app.use(cors());
 
 //Remoção de usuários inativos
 setInterval(async () => {
+  const agora = Date.now();
   const participants = await fetch("http://localhost:5000/participants").then(
     (res) => res.json()
   );
   participants.forEach(async (participant) => {
-    if (Date.now() - participant.lastStatus > 10000) {
-      console.log(Date.now(), participant.lastStatus);
+    if (agora - participant.lastStatus >= 10000) {
+
       try {
         const result = await db
           .collection("participants")
@@ -133,6 +134,7 @@ app.get("/messages", async (req, res) => {
       messages = await collection
         .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
         .project({ _id: 0 })
+        .sort({time: -1})
         .limit(limit)
         .toArray();
     }
