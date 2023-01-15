@@ -50,7 +50,7 @@ setInterval(async () => {
   });
 }, 15000);
 
-app.post("/participants", findParticipantByName, (req, res) => {
+app.post("/participants", findParticipantByName, async (req, res) => {
   const participant = req.body;
   const statusValidate = schemas.participants.validate(participant);
   const collection = db.collection("participants");
@@ -63,21 +63,24 @@ app.post("/participants", findParticipantByName, (req, res) => {
 
   if (req.findedUser) return res.status(409).send("Nome de usuário em uso");
 
-  const insertPromise = collection.insertOne({
-    ...participant,
-    lastStatus: Date.now(),
-  });
+  try {
+    await collection.insertOne({
+      ...participant,
+      lastStatus: Date.now(),
+    });
 
-  insertPromise.then(() => res.sendStatus(201));
-  insertPromise.catch(() => res.sendStatus(500));
+    await messages.insertOne({
+      from: participant.name,
+      to: "Todos",
+      text: "entra na sala...",
+      type: "status",
+      time: dayjs().format("HH:mm:ss"),
+    });
 
-  messages.insertOne({
-    from: participant.name,
-    to: "Todos",
-    text: "entra na sala...",
-    type: "status",
-    time: dayjs().format("HH:mm:ss"),
-  });
+    res.sendStatus(201)
+  } catch (error) {
+    return res.status(500).send("Erro interno: " + error);
+  }
 });
 
 app.get("/participants", async (_, res) => {
@@ -106,10 +109,9 @@ app.post("/messages", async (req, res) => {
       from: from,
       time: dayjs().format("HH:mm:ss"),
     });
-    await db.collection("participants").updateOne(
-      { name: from },
-      { $set: { lastStatus: Date.now() } }
-    );
+    await db
+      .collection("participants")
+      .updateOne({ name: from }, { $set: { lastStatus: Date.now() } });
     return res.sendStatus(201);
   } catch (err) {
     return res.status(500).send(err);
@@ -124,7 +126,7 @@ app.get("/messages", async (req, res) => {
   try {
     const messages = await collection
       .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
-      .project({_id: 0})
+      .project({ _id: 0 })
       .limit(limit)
       .toArray();
 
