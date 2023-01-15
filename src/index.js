@@ -48,7 +48,7 @@ setInterval(async () => {
       }
     }
   });
-}, 15000);
+}, 10000);
 
 app.post("/participants", findParticipantByName, async (req, res) => {
   const participant = req.body;
