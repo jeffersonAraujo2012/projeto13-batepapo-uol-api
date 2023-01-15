@@ -7,5 +7,5 @@ export const participants = Joi.object({
 export const messages = Joi.object({
   to: Joi.string().required(),
   text: Joi.string().required(),
-  type: Joi.string().allow("message","private_message").required(),
+  type: Joi.string().valid("message","private_message").required(),
 });
