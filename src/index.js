@@ -125,15 +125,14 @@ app.get("/messages", async (req, res) => {
   try {
     let messages;
 
-    if (limit === Infinity) {
-      messages = await collection
+    messages = await collection
         .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
         .toArray();
-    } else {
-      messages = await collection
-        .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
-        .limit(limit)
-        .toArray();
+    
+    messages.reverse();
+
+    if (limit !== Infinity) {
+      messages = messages.slice(0, limit);
     }
 
     return res.status(200).send(messages);
