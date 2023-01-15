@@ -119,6 +119,8 @@ app.get("/messages", async (req, res) => {
   const limit = Number(req.query.limit);
   const collection = db.collection("messages");
 
+  if (limit <= 0 || isNaN(limit)) return res.sendStatus(422);
+
   try {
     const messages = await collection
       .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
