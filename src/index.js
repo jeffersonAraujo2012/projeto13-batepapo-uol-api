@@ -89,17 +89,13 @@ app.get("/participants", async (_, res) => {
   res.status(200).send(participants);
 });
 
-app.post("/messages", async (req, res) => {
+app.post("/messages", findParticipantByName, async (req, res) => {
   const message = req.body;
   const from = req.headers.user;
   const collection = db.collection("messages");
   const statusValidade = schemas.messages.validate(message);
-  //Já o from da mensagem, ou seja, o remetente, não será enviado
-  //pelo body. Será enviado pelo front através de um header na
-  //requisição, chamado User
-  //ToDo
 
-  if (statusValidade.error) {
+  if (statusValidade.error || !req.findedUser) {
     return res.sendStatus(422);
   }
 
