@@ -24,9 +24,8 @@ app.use(cors());
 //Remoção de usuários inativos
 setInterval(async () => {
   const agora = Date.now();
-  const participants = await fetch("http://localhost:5000/participants").then(
-    (res) => res.json()
-  );
+  const participants = await db.collection("participants").find({}).toArray();
+  
   participants.forEach(async (participant) => {
     if (agora - participant.lastStatus >= 10000) {
 
