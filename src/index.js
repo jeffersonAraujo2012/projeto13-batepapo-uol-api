@@ -118,20 +118,28 @@ app.get("/messages", async (req, res) => {
   const user = req.headers.user;
   const limit = req.query.limit ? Number(req.query.limit) : Infinity;
   const collection = db.collection("messages");
-  Math.INFINIT;
 
   if (limit <= 0 || isNaN(limit)) return res.sendStatus(422);
 
   try {
-    const messages = await collection
-      .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
-      .project({ _id: 0 })
-      .limit(limit)
-      .toArray();
+    let messages;
 
-    res.status(201).send(messages);
+    if (limit === Infinity) {
+      messages = await collection
+        .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
+        .project({ _id: 0 })
+        .toArray();
+    } else {
+      messages = await collection
+        .find({ $or: [{ from: user }, { to: user }, { to: "Todos" }] })
+        .project({ _id: 0 })
+        .limit(limit)
+        .toArray();
+    }
+
+    return res.status(201).send(messages);
   } catch (error) {
-    res.status(500).send({ msg: "Algo deu errado internamente", error });
+    return res.status(500).send({ msg: "Algo deu errado internamente", error });
   }
 });
 
