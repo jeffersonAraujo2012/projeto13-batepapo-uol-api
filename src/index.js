@@ -77,7 +77,7 @@ app.post("/participants", findParticipantByName, async (req, res) => {
       time: dayjs().format("HH:mm:ss"),
     });
 
-    res.sendStatus(201)
+    res.sendStatus(201);
   } catch (error) {
     return res.status(500).send("Erro interno: " + error);
   }
@@ -116,8 +116,9 @@ app.post("/messages", findParticipantByName, async (req, res) => {
 
 app.get("/messages", async (req, res) => {
   const user = req.headers.user;
-  const limit = Number(req.query.limit);
+  const limit = req.query.limit ? Number(req.query.limit) : Infinity;
   const collection = db.collection("messages");
+  Math.INFINIT;
 
   if (limit <= 0 || isNaN(limit)) return res.sendStatus(422);
 
